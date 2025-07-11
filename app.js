@@ -1,8 +1,10 @@
-const createUserUrl = "https://borjomi.loremipsum.ge/api/register", //method POST  ყველა ველი სავალდებულო
-  getAllUsersUrl = "https://borjomi.loremipsum.ge/api/all-users", //method GET
-  getSingleUserUrl = "https://borjomi.loremipsum.ge/api/get-user/120 ", //id, method  GET
-  updateUserUrl = "https://borjomi.loremipsum.ge/api/update-user/145 ", //id, method PUT  ყველა ველი სავალდებულო
-  deleteUserUrl = "https://borjomi.loremipsum.ge/api/delete-user/145"; //id, method DELETE
+const API_BASE = "https://borjomi.loremipsum.ge/api";
+
+const createUserUrl = `${API_BASE}/register`; // POST
+const getAllUsersUrl = `${API_BASE}/all-users`; // GET
+const getSingleUserUrl = `${API_BASE}/get-user/`; // + id, GET
+const updateUserUrl = `${API_BASE}/update-user/`; // + id, PUT
+const deleteUserUrl = `${API_BASE}/delete-user/`; // + id, DELETE
 
 const regForm = document.querySelector("#registration-form"),
   userName = regForm.querySelector("#user-name"),
@@ -11,30 +13,45 @@ const regForm = document.querySelector("#registration-form"),
   userPhone = regForm.querySelector("#user-phone"),
   userPersonalID = regForm.querySelector("#user-personal-id"),
   userZip = regForm.querySelector("#user-zip-code"),
-  userGender = regForm.querySelector("[name='gender']:checked"),
-  // user id ფორმში, რომელიც გვჭირდება დაედითებისთვის
   userId = document.querySelector("#user-id");
 
 const addNewUserBtn = document.querySelector("#add-new-user"),
+  addRandomUserBtn = document.querySelector("#add-random-user"),
   dialogEl = document.querySelector("dialog"),
   closeDialog = dialogEl.querySelector("#close");
+
 addNewUserBtn.addEventListener("click", () => {
+  // Clear form when adding new user
+  regForm.reset();
+  userId.value = "";
   dialogEl.showModal();
 });
-closeDialog.addEventListener("click", (e) => {
+
+closeDialog.addEventListener("click", () => {
   dialogEl.close();
 });
 
-const dataExample = {
-  first_name: "satesto",
-  last_name: "text",
-  phone: "123456789",
-  id_number: "12345678909",
-  email: "text121324567@gmail.com",
-  gender: "male",
-  zip_code: "1245",
-};
+///rendom user test
+// add
+addRandomUserBtn.addEventListener("click", () => {
+  const randomUser = generateRandomUser();
+  sendUserData(randomUser);
+});
 
+//generator function
+function generateRandomUser() {
+  const randomNum = Math.floor(Math.random() * 10000);
+  return {
+    first_name: `TestName${randomNum}`,
+    last_name: `TestLast${randomNum}`,
+    phone: `555${Math.floor(1000000 + Math.random() * 9000000)}`,
+    id_number: `${Math.floor(100000000 + Math.random() * 900000000)}`,
+    email: `test${randomNum}@gmail.com`,
+    gender: ["male", "female", "other"][Math.floor(Math.random() * 3)],
+    zip_code: `${Math.floor(1000 + Math.random() * 9000)}`,
+  };
+}
+// Test fetch
 function getCharacters1() {
   fetch("https://hp-api.onrender.com/api/characters")
     .then((res) => res.json())
@@ -49,108 +66,210 @@ function getCharacters1() {
     });
 }
 
-function userActions() {
-  // 1. ცხრილში ღილაკებზე უნდა მიამაგროთ event listener-ები
-  // 2. იქნება 2 ღილაკი რედაქტირება და წაშლა როგორც "ცხრილი.png" ში ჩანს
-  // 3. id შეგიძლიათ შეინახოთ data-user-id ატრიბუტად ღილაკებზე, data ატრიბუტებზე წვდომა შეგიძლიათ dataset-ის გამოყენებით მაგ:selectedElement.dataset
-  // 4. წაშლა ღილაკზე დაჭერისას უნდა გაიგზავნოს წაშლის მოთხოვნა (deleteUser ფუნქციის მეშვეობით) სერვერზე და გადაეცეს id
-  // 5. ედიტის ღილაკზე უნდა გაიხსნას მოდალი სადაც ფორმი იქნება იმ მონაცემებით შევსებული რომელზეც მოხდა კლიკი. ედიტის ღილაკზე უნდა გამოიძახოთ getSingleUser ფუნქცია და რომ დააბრუნებს ერთი მომხმარებლის დატას (ობიექტს და არა მასივს) const data = await getSingleUser(btn.dataset.userId); ამ ინფორმაციით  უნდა შეივსოს ფორმი და ამის შემდეგ შეგიძლიათ დააედიტოთ ეს ინფორმაცია და ფორმის დასაბმითებისას უნდა მოხდეს updateUser() ფუნქციის გამოძახება, სადაც გადასცემთ განახლებულ იუზერის ობიექტს, გვჭირდება იუზერის აიდიც, რომელიც  მოდალის გახსნისას user-id-ის (hidden input არის და ვიზუალურად არ ჩანს) value-ში შეგიძლიათ შეინახოთ.
+// updateUser
+function updateUser(userObj) {
+  fetch(`${updateUserUrl}${userObj.id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(userObj),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      console.log("Updated:", data);
+      getUsers();
+    })
+    .catch((e) => console.log(e));
 }
 
-async function getUsers() {
-  try {
-    const response = await fetch("https://borjomi.loremipsum.ge/api/all-users");
-    const data = await response.json();
-    console.log("getUsers", data.users);
-    // render user cards
-    // TODO: data.users არის სერვერიდან დაბრუნებული ობიექტების მასივი
-    // TODO: ამ მონაცმების მიხედვით html ში ჩასვით ცხრილი როგორც "ცხრილი.png" შია
-
-    userActions(); // ყოველ რენდერზე ახლიდან უნდა მივაბათ ივენთ ლისნერები
-  } catch (e) {
-    console.log("Error fetching users:", e);
-  } finally {
-    console.log("finally Fetch completed");
-  }
-}
-
-async function getSingleUser(id) {
-  try {
-    const response = await fetch(
-      `https://borjomi.loremipsum.ge/api/get-user/${id}`
-    );
-    const data = await response.json();
-    return data;
-  } catch (e) {
-    console.log("Error - ", e);
-  }
-}
 function sendUserData(userDataObject) {
-  fetch("https://borjomi.loremipsum.ge/api/register", {
+  fetch(createUserUrl, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(userDataObject),
   })
-    .then((response) => {
-      return response.json();
-    })
+    .then((response) => response.json())
     .then((data) => {
-      console.log(data);
-    });
-}
-
-function deleteUser(id) {
-  fetch(`https://borjomi.loremipsum.ge/api/delete-user/${id}`, {
-    method: "DELETE",
-  })
-    .then((response) => {
-      return response.json();
-    })
-    .then((data) => {
-      console.log(data);
+      console.log("Created:", data);
       getUsers();
+    })
+    .catch((e) => console.log(e));
+}
+
+async function deleteUser(id) {
+  try {
+    const response = await fetch(`${deleteUserUrl}${id}`, {
+      method: "DELETE",
     });
+    const data = await response.json();
+    console.log("Deleted:", data);
+    getUsers();
+  } catch (e) {
+    console.log("Error deleting user:", e);
+  }
 }
 
-function updateUser(userObj) {
-  // მიიღებს დაედითებულ ინფორმაციას და გააგზავნით სერვერზე, ისე როგორც რეგისტრაციისას
-  // TODO დაასრულეთ ფუნქცია
-  //  method: "put",  http://borjomi.loremipsum.ge/api/update-user/${userObj.id}
-  // TODO: შენახვის, ედიტირების და წაშლის შემდეგ ახლიდან წამოიღეთ დატა
-}
+const deleteAllUsersBtn = document.querySelector("#delete-all-users");
 
-try {
-  regForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    // validations
+deleteAllUsersBtn.addEventListener("click", () => {
+  deleteAllUsersOneByOne();
+});
 
-    if (true) {
-      // request to send data
+async function deleteAllUsersOneByOne() {
+  try {
+    const response = await fetch(getAllUsersUrl);
+    const data = await response.json();
+    const users = data.users;
 
-      const userData = {
-        first_name: userName.value,
-        last_name: userSurname.value,
-        phone: userPhone.value,
-        id_number: userPersonalID.value,
-        email: userEmail.value,
-        gender: regForm.querySelector("[name='gender']:checked").value,
-        zip_code: userZip.value,
-      };
-      // console.log(userData);
-
-      //  TODO: თუ userId.value არის ცარიელი (თავიდან ცარიელია) მაშინ უნდა შევქმნათ  -->  sendUserData(userData);
-      // sendUserData(userData);
-
-      // თუ დაედითებას ვაკეთებთ, ჩვენ ვანიჭებთ მნიშვნელობას userActions ფუნქციაში
-      // TODO: თუ userId.value არის (არაა ცარიელი სტრინგი) მაშინ უნდა დავაედიტოთ, (როცა ფორმს ედითის ღილაკის შემდეგ იუზერის ინფუთით ვავსებთ, ვაედითებთ და ვასაბმითებთ) -->  updateUser(userData);
+    for (const user of users) {
+      await fetch(`${deleteUserUrl}${user.id}`, { method: "DELETE" });
+      console.log(`Deleted user ${user.id}`);
+      await new Promise((resolve) => setTimeout(resolve, 500));
     }
-  });
-} catch (e) {
-  console.log(e);
+
+    getUsers();
+  } catch (e) {
+    console.log("Error deleting all users:", e);
+  }
 }
+
+function userActions() {
+  const editButtons = document.querySelectorAll(".edit-btn");
+  const deleteButtons = document.querySelectorAll(".delete-btn");
+
+  editButtons.forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const id = btn.dataset.userId;
+      const data = await getSingleUser(id);
+
+      userName.value = data.first_name;
+      userSurname.value = data.last_name;
+      userEmail.value = data.email;
+      userPhone.value = data.phone;
+      userPersonalID.value = data.id_number;
+      userZip.value = data.zip_code;
+
+      if (data.gender === "male") regForm.querySelector("#male").checked = true;
+      if (data.gender === "female")
+        regForm.querySelector("#female").checked = true;
+      if (data.gender === "other")
+        regForm.querySelector("#other").checked = true;
+
+      userId.value = data.id;
+
+      dialogEl.showModal();
+    });
+  });
+
+  deleteButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const id = btn.dataset.userId;
+      deleteUser(id);
+    });
+  });
+}
+
+async function getSingleUser(id) {
+  try {
+    const response = await fetch(`${getSingleUserUrl}${id}`);
+    const data = await response.json();
+    console.log("Returned from getSingleUser:", data);
+
+    if (data && data.users) {
+      return data.users;
+    } else {
+      console.log("getSingleUser returned unexpected:", data);
+      return null;
+    }
+  } catch (e) {
+    console.log("Error - ", e);
+  }
+}
+
+async function getUsers() {
+  try {
+    const response = await fetch(getAllUsersUrl);
+    const data = await response.json();
+    const users = data.users;
+
+    console.log("getUsers", users);
+
+    const container = document.getElementById("users-container");
+    container.innerHTML = "";
+
+    // table
+    const table = document.createElement("table");
+    const thead = document.createElement("thead");
+    thead.innerHTML = `
+        <tr>
+    <th>ID</th>
+    <th>First Name</th>
+    <th>Last Name</th>
+    <th>Email</th>
+    <th>Personal ID</th>
+    <th>Mobile Number</th>
+    <th>Zip</th>
+    <th>Gender</th>
+    <th>Actions</th>
+  </tr>
+      `;
+    table.appendChild(thead);
+
+    const tbody = document.createElement("tbody");
+
+    users.forEach((user) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+          <td>${user.id}</td>
+          <td>${user.first_name}</td>
+          <td>${user.last_name}</td>
+          <td>${user.email}</td>
+          <td>${user.id_number}</td>
+          <td>${user.phone}</td>
+          <td>${user.zip_code}</td>
+          <td>${user.gender}</td>
+          <td>
+            <button class="edit-btn" data-user-id="${user.id}">Edit</button>
+            <button class="delete-btn" data-user-id="${user.id}">Delete</button>
+          </td>
+        `;
+      tbody.appendChild(tr);
+    });
+
+    table.appendChild(tbody);
+    container.appendChild(table);
+
+    userActions();
+  } catch (e) {
+    console.log("Error fetching users:", e);
+  }
+}
+
+regForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+
+  const userData = {
+    first_name: userName.value,
+    last_name: userSurname.value,
+    phone: userPhone.value,
+    id_number: userPersonalID.value,
+    email: userEmail.value,
+    gender: regForm.querySelector("[name='gender']:checked").value,
+    zip_code: userZip.value,
+    id: userId.value,
+  };
+
+  if (userId.value === "") {
+    sendUserData(userData);
+  } else {
+    updateUser(userData);
+  }
+
+  dialogEl.close();
+});
 
 getCharacters1();
 getUsers();
-// console.log("after fetch");

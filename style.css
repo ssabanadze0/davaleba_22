@@ -38,13 +38,36 @@ form {
   margin: 0 auto;
 }
 button {
-  background-color: darkblue;
+  background-color: blue;
   border: none;
   outline: none;
   padding: 10px 20px;
   color: white;
   cursor: pointer;
 }
+.add-button {
+  display: block;
+  margin: 30px auto;
+  background-color: green;
+  color: white;
+  padding: 12px 30px;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  border-radius: 6px;
+}
+.delete-all-users {
+  display: block;
+  margin: 20px auto;
+  background-color: red;
+  color: white;
+  padding: 12px 30px;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  border-radius: 6px;
+}
+
 .modal {
   position: fixed;
   top: 0;
@@ -80,4 +103,56 @@ dialog {
 section {
   padding-top: 50px;
   padding-bottom: 50px;
+}
+/* //////0 */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 40px;
+}
+
+th,
+td {
+  border: 1px solid #ddd;
+  padding: 12px 15px;
+  text-align: left;
+}
+
+th {
+  background-color: #f4f4f4;
+}
+
+tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+tr:hover {
+  background-color: #f1f1f1;
+}
+
+/* buttons in table */
+.edit-btn,
+.delete-btn {
+  padding: 6px 12px;
+  border: none;
+  cursor: pointer;
+  margin-right: 5px;
+}
+
+.edit-btn {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.delete-btn {
+  background-color: #dc3545;
+  color: #fff;
+}
+
+.edit-btn:hover {
+  background-color: #0056b3;
+}
+
+.delete-btn:hover {
+  background-color: #c82333;
 }
