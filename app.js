@@ -67,36 +67,38 @@ function getCharacters1() {
 }
 
 // updateUser
-function updateUser(userObj) {
-  fetch(`${updateUserUrl}${userObj.id}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(userObj),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      console.log("Updated:", data);
-      getUsers();
-    })
-    .catch((e) => console.log(e));
+async function updateUser(userObj) {
+  try {
+    const response = await fetch(`${updateUserUrl}${userObj.id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(userObj),
+    });
+    const data = await response.json();
+    console.log("Updated:", data);
+    getUsers();
+  } catch (e) {
+    console.log("Error updating user:", e);
+  }
 }
 
-function sendUserData(userDataObject) {
-  fetch(createUserUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(userDataObject),
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      console.log("Created:", data);
-      getUsers();
-    })
-    .catch((e) => console.log(e));
+async function sendUserData(userDataObject) {
+  try {
+    const response = await fetch(createUserUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(userDataObject),
+    });
+    const data = await response.json();
+    console.log("Created:", data);
+    getUsers();
+  } catch (e) {
+    console.log("Error creating user:", e);
+  }
 }
 
 async function deleteUser(id) {
